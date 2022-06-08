@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Install Dependencies
+bundle install
+
+# Creates a docker container to serve local gems.
+#
+# Access -- http://localhost:9292
+# Remove -- docker rm --force local-gems
+#
+echo -e "\033[1mCreating Geminabox Container\033[0m"
+if [ ! $(docker volume ls | grep -o 'volume-gems') ]; then
+  echo "Docker volume '$(docker volume create volume-gems)' created."
+fi
+
+if [ ! $(docker ps -a | grep -o 'local-gems') ]; then
+  docker run --name local-gems \
+    --restart always \
+    -e PRIVATE=true \
+    -p 9292:9292 \
+    -v volume-gems:/webapps/geminabox/data \
+    -d spoonest/geminabox:latest
+else
+  echo "Container 'local-gems' exists."
+fi
